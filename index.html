@@ -71,7 +71,7 @@
         }
 
         .screen { display: none; }
-        .screen.active { display: block; animation: softFade 0.6s ease-out; }
+        .screen.active { display: block; animation: softFade 0.5s ease-out; }
         @keyframes softFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* כותרת בשחור לבדיקת עדכון */
@@ -83,12 +83,12 @@
         #avatar-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            gap: 10px;
             min-height: 200px;
-            max-height: 300px;
+            max-height: 350px;
             overflow-y: auto;
             padding: 10px;
-            background: rgba(183, 110, 121, 0.03);
+            background: rgba(183, 110, 121, 0.05);
             border-radius: 20px;
             margin-bottom: 15px;
             border: 1px solid var(--blush-pink);
@@ -102,12 +102,12 @@
             cursor: pointer;
             transition: all 0.2s;
             background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .avatar-item.selected { border-color: var(--gold); background: var(--blush-pink); transform: scale(1.1); }
+        .avatar-item.selected { border-color: var(--gold); background: var(--blush-pink); transform: scale(1.1); box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); }
         .avatar-item.taken { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
 
         input[type="text"] {
@@ -120,7 +120,6 @@
             text-align: center;
             outline: none;
             font-weight: 700;
-            color: var(--deep-rose);
         }
 
         .btn {
@@ -134,9 +133,7 @@
             width: 100%;
             font-weight: 800;
             box-shadow: 0 10px 20px rgba(136, 14, 79, 0.15);
-            transition: all 0.3s;
         }
-        .btn:active { transform: scale(0.95); opacity: 0.9; }
 
         #live-rankings {
             background: white;
@@ -146,7 +143,6 @@
             display: flex;
             justify-content: space-around;
             border: 1px solid var(--blush-pink);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
         }
         .rank-item { display: flex; flex-direction: column; align-items: center; font-weight: 800; color: var(--deep-rose); font-size: 0.75rem; }
         .rank-avatar { font-size: 1.3rem; margin-bottom: 2px; }
@@ -157,10 +153,7 @@
             margin-bottom: 20px; 
             color: #222; 
             line-height: 1.3;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 60px;
         }
 
         .options-grid { display: grid; gap: 10px; }
@@ -172,9 +165,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
             color: #444;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         .option-btn:hover { border-color: var(--rose-gold); background: #fffcfc; }
         .tf-btn-true { border-color: #a5d6a7; color: #2e7d32; }
@@ -192,11 +183,11 @@
         .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f9f9f9; font-size: 1rem; }
         .leaderboard-item.top { background: var(--blush-pink); font-weight: 800; border-radius: 15px; color: var(--deep-rose); }
 
+        .footer-tag { font-size: 0.6rem; color: #ccc; margin-top: 15px; }
+
         @media (max-width: 480px) {
+            .avatar-grid { grid-template-columns: repeat(3, 1fr); }
             h1 { font-size: 1.8rem; }
-            #avatar-grid { grid-template-columns: repeat(3, 1fr); min-height: 200px; }
-            .question-text { font-size: 1.3rem; }
-            .option-btn { padding: 14px; font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -205,16 +196,24 @@
     <div id="game-wrapper">
         <button id="vol-toggle" class="volume-btn">🔊</button>
 
+        <!-- Screen 1: Login -->
         <div id="login-screen" class="screen active">
             <h1>הטריוויה של נטי</h1>
             <span class="subtitle">נראה מי באמת מכירה את נטי</span>
-            <div id="error-msg" style="color: var(--deep-rose); margin-bottom: 10px; display: none; font-weight: 800; font-size: 0.9rem; padding: 5px; border: 1px solid var(--blush-pink); border-radius: 10px;"></div>
+            <div id="error-msg" style="color: var(--deep-rose); margin-bottom: 10px; display: none; font-weight: 800; font-size: 0.9rem;"></div>
+            
             <input type="text" id="player-name" placeholder="השם שלך..." maxlength="12">
+            
             <div class="section-label">בחרי דמות וצאי לדרך:</div>
-            <div id="avatar-grid"></div>
+            <div id="avatar-grid">
+                <!-- יתמלא על ידי ה-JS -->
+            </div>
+            
             <button class="btn" id="join-btn">התחל משחק</button>
+            <div class="footer-tag">גרסת תיקון סופית 15</div>
         </div>
 
+        <!-- Screen 2: Quiz -->
         <div id="quiz-screen" class="screen">
             <div id="live-rankings">
                 <div class="rank-item" id="rank-1"><span>🥇</span><span class="rank-avatar">-</span><span>-</span></div>
@@ -226,6 +225,7 @@
             <div id="options-container" class="options-grid"></div>
         </div>
 
+        <!-- Screen 3: Results -->
         <div id="end-screen" class="screen">
             <h1 style="font-size: 2rem;">התוצאות</h1>
             <p id="personal-result" style="color: var(--deep-rose); font-size: 1.3rem; font-weight: 800; margin: 15px 0;"></p>
@@ -243,12 +243,12 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
+        // Configuration
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-v14-ultra-fix';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-mitzvah-v15';
 
         const music = document.getElementById('bg-music');
         let userName = "", selectedAvatar = "", currentScore = 0, currentQIndex = 0;
@@ -281,7 +281,8 @@
             { q: "נכון או לא נכון: נולדתי ביערות הגשם", opts: ["נכון", "לא נכון"], ans: 1, type: "tf" }
         ];
 
-        function renderAvatars() {
+        // Force Render Function
+        const renderAvatars = () => {
             const grid = document.getElementById('avatar-grid');
             if (!grid) return;
             grid.innerHTML = '';
@@ -298,23 +299,21 @@
                 }
                 grid.appendChild(div);
             });
-        }
+        };
 
         const handleJoin = async () => {
-            const nameInput = document.getElementById('player-name');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('player-name').value.trim();
             if (!name) { showError("בבקשה תכתבי את השם שלך"); return; }
-            if (!selectedAvatar) { showError("בבקשה תבחרי דמות יפה"); return; }
+            if (!selectedAvatar) { showError("בבקשה תבחרי דמות חמודה"); return; }
             
             if (!auth.currentUser) {
-                showError("מתחבר לשרת... נסי שוב בעוד רגע");
+                showError("מתחבר... נסי שוב בעוד רגע");
                 return;
             }
 
             userName = name;
-            const joinBtn = document.getElementById('join-btn');
-            joinBtn.disabled = true;
-            joinBtn.innerText = "מתחבר...";
+            const btn = document.getElementById('join-btn');
+            btn.disabled = true; btn.innerText = "מתחבר...";
 
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), {
@@ -326,38 +325,28 @@
                 loadQuestion();
             } catch(e) {
                 console.error(e);
-                joinBtn.disabled = false;
-                joinBtn.innerText = "התחל משחק";
-                showError("שגיאה בחיבור למסד הנתונים");
+                btn.disabled = false; btn.innerText = "התחל משחק";
+                showError("שגיאת חיבור. בדקי אינטרנט");
             }
         };
 
         function showError(msg) {
             const e = document.getElementById('error-msg');
-            if(e) { 
-                e.innerText = msg; 
-                e.style.display = 'block'; 
-                setTimeout(() => { if(e) e.style.display = 'none'; }, 4000); 
-            }
+            if(e) { e.innerText = msg; e.style.display = 'block'; setTimeout(() => { if(e) e.style.display = 'none'; }, 4000); }
         }
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) target.classList.add('active');
+            document.getElementById(id).classList.add('active');
             window.scrollTo(0,0);
         }
 
         function loadQuestion() {
             if (currentQIndex >= questions.length) { finishGame(); return; }
             const q = questions[currentQIndex];
-            const qCounter = document.getElementById('q-counter');
-            if(qCounter) qCounter.innerText = `שאלה ${currentQIndex + 1} מתוך ${questions.length}`;
-            const qText = document.getElementById('question-text');
-            if(qText) qText.innerText = q.q;
-            
+            document.getElementById('q-counter').innerText = `שאלה ${currentQIndex + 1} מתוך ${questions.length}`;
+            document.getElementById('question-text').innerText = q.q;
             const container = document.getElementById('options-container');
-            if(!container) return;
             container.innerHTML = '';
             q.opts.forEach((opt, idx) => {
                 const b = document.createElement('button');
@@ -370,21 +359,16 @@
         }
 
         async function selectAnswer(idx) {
-            if (idx === questions[currentQIndex].ans) {
-                currentScore++;
-            }
+            if (idx === questions[currentQIndex].ans) currentScore++;
             const percent = Math.round((currentScore / questions.length) * 100);
             if (auth.currentUser) {
-                try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), { score: percent });
-                } catch (e) { console.error("Update score error:", e); }
+                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), { score: percent }); } catch (e) {}
             }
             currentQIndex++;
             loadQuestion();
         }
 
         function startSync() {
-            if (!auth.currentUser) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'players');
             onSnapshot(colRef, (snap) => {
                 const players = [];
@@ -400,11 +384,10 @@
                     const el = document.getElementById(`rank-${i}`);
                     if (el) {
                         if (players[i-1]) {
-                            el.children[1].innerText = players[i-1].avatar || "❓";
+                            el.children[1].innerText = players[i-1].avatar;
                             el.children[2].innerText = `${players[i-1].name} (${players[i-1].score}%)`;
                         } else {
-                            el.children[1].innerText = "-";
-                            el.children[2].innerText = "-";
+                            el.children[1].innerText = "-"; el.children[2].innerText = "-";
                         }
                     }
                 }
@@ -423,31 +406,28 @@
         async function finishGame() {
             showScreen('end-screen');
             const percent = Math.round((currentScore / questions.length) * 100);
-            const resText = document.getElementById('personal-result');
-            if(resText) resText.innerText = `${userName}, הציון הסופי שלך הוא ${percent}%!`;
-            
-            const confettiColors = ['#f4dada', '#b76e79', '#d4af37', '#880e4f'];
-            for(let i=0; i<50; i++) {
+            document.getElementById('personal-result').innerText = `${userName}, הציון שלך: ${percent}%!`;
+            for(let i=0; i<40; i++) {
                 setTimeout(() => {
                     const c = document.createElement('div');
-                    c.className = 'confetti';
-                    c.style.cssText = `position:fixed; width:10px; height:10px; border-radius:50%; z-index:1000; top:-10px; left:${Math.random()*100}vw; background:${confettiColors[Math.floor(Math.random()*4)]}; animation:fall ${Math.random()*2+2}s linear forwards;`;
+                    c.style.cssText = `position:fixed; width:10px; height:10px; border-radius:50%; z-index:1000; top:-10px; left:${Math.random()*100}vw; background:${['#f4dada', '#b76e79', '#d4af37'][Math.floor(Math.random()*3)]}; animation:fall ${Math.random()*2+2}s linear forwards;`;
                     document.body.appendChild(c);
                     setTimeout(() => c.remove(), 4000);
                 }, i * 60);
             }
         }
 
-        // Setup Volume
+        // DOM Ready - Immediate UI Rendering
+        renderAvatars();
+
+        // Event Listeners
+        document.getElementById('join-btn').addEventListener('click', handleJoin);
         document.getElementById('vol-toggle').addEventListener('click', () => {
             music.muted = !music.muted;
             document.getElementById('vol-toggle').innerText = music.muted ? "🔇" : "🔊";
         });
 
-        // Setup Join Button
-        document.getElementById('join-btn').addEventListener('click', handleJoin);
-
-        // Auth Sequence
+        // Firebase Auth Sequence
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -455,21 +435,13 @@
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (error) { 
-                console.error("Auth Error:", error); 
-                showError("בעיית חיבור - נסי לרענן את הדף");
-            }
+            } catch (error) { console.error("Auth Error:", error); }
         };
 
         onAuthStateChanged(auth, (user) => { 
-            if (user && !syncInitialized) {
-                syncInitialized = true;
-                startSync(); 
-            }
+            if (user && !syncInitialized) { syncInitialized = true; startSync(); }
         });
 
-        // Start App
-        renderAvatars();
         initAuth();
     </script>
 </body>
