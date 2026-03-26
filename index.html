@@ -71,8 +71,8 @@
         }
 
         .screen { display: none; }
-        .screen.active { display: block; animation: softFade 0.5s ease-out; }
-        @keyframes softFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .screen.active { display: block; animation: softFade 0.6s ease-out; }
+        @keyframes softFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* כותרת בשחור לבדיקת עדכון */
         h1 { color: #000000; font-family: 'Tinos', serif; font-size: 2.2rem; margin: 0 0 5px 0; }
@@ -84,11 +84,11 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
-            min-height: 200px; /* גובה מינימלי למניעת היעלמות */
-            max-height: 280px;
+            min-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             padding: 10px;
-            background: rgba(183, 110, 121, 0.05);
+            background: rgba(183, 110, 121, 0.03);
             border-radius: 20px;
             margin-bottom: 15px;
             border: 1px solid var(--blush-pink);
@@ -183,8 +183,6 @@
         .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f9f9f9; font-size: 1rem; }
         .leaderboard-item.top { background: var(--blush-pink); font-weight: 800; border-radius: 15px; color: var(--deep-rose); }
 
-        .version-tag { font-size: 0.6rem; color: #ccc; margin-top: 10px; }
-
         @media (max-width: 480px) {
             .avatar-grid { grid-template-columns: repeat(3, 1fr); }
             h1 { font-size: 1.8rem; }
@@ -205,11 +203,10 @@
             
             <div class="section-label">בחרי דמות וצאי לדרך:</div>
             <div class="avatar-grid" id="avatar-grid">
-                <!-- יתמלא אוטומטית על ידי JavaScript -->
+                <!-- יתמלא על ידי JavaScript -->
             </div>
             
             <button class="btn" id="join-btn" onclick="window.joinGame()">התחל משחק</button>
-            <div class="version-tag">גרסה מעודכנת - בדיקה</div>
         </div>
 
         <div id="quiz-screen" class="screen">
@@ -224,7 +221,7 @@
         </div>
 
         <div id="end-screen" class="screen">
-            <h1 style="font-size: 2rem; color: #000;">התוצאות</h1>
+            <h1 style="font-size: 2rem;">התוצאות</h1>
             <p id="personal-result" style="color: var(--deep-rose); font-size: 1.3rem; font-weight: 800; margin: 15px 0;"></p>
             <div class="leaderboard" id="leaderboard-list">טוען נתונים...</div>
             <button class="btn" style="margin-top:20px; background: white; color: var(--rose-gold); border: 2px solid var(--rose-gold);" onclick="location.reload()">חזרה להתחלה</button>
@@ -245,7 +242,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-mitzvah-v12';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-mitzvah-v13-final';
 
         const music = document.getElementById('bg-music');
         let userName = "", selectedAvatar = "", currentScore = 0, currentQIndex = 0;
@@ -301,7 +298,8 @@
         }
 
         window.joinGame = async () => {
-            const name = document.getElementById('player-name').value.trim();
+            const nameInput = document.getElementById('player-name');
+            const name = nameInput.value.trim();
             if (!name) { showError("כתבי שם קודם!"); return; }
             if (!selectedAvatar) { showError("בחרי דמות!"); return; }
             if (!auth.currentUser) { showError("מתחבר לשרת..."); return; }
@@ -327,7 +325,8 @@
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
             window.scrollTo(0,0);
         }
 
@@ -372,9 +371,14 @@
                 players.sort((a,b) => b.score - a.score || a.timestamp - b.timestamp);
                 for (let i = 1; i <= 3; i++) {
                     const el = document.getElementById(`rank-${i}`);
-                    if (el && players[i-1]) {
-                        el.children[1].innerText = players[i-1].avatar;
-                        el.children[2].innerText = `${players[i-1].name} (${players[i-1].score}%)`;
+                    if (el) {
+                        if (players[i-1]) {
+                            el.children[1].innerText = players[i-1].avatar;
+                            el.children[2].innerText = `${players[i-1].name} (${players[i-1].score}%)`;
+                        } else {
+                            el.children[1].innerText = "-";
+                            el.children[2].innerText = "-";
+                        }
                     }
                 }
                 const list = document.getElementById('leaderboard-list');
@@ -408,8 +412,6 @@
             if (user && !syncInitialized) { syncInitialized = true; startSync(); }
         });
 
-        // Initialize
-        renderAvatars();
         const initAuth = async () => {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
@@ -417,6 +419,8 @@
                 await signInAnonymously(auth);
             }
         };
+        
+        renderAvatars();
         initAuth();
     </script>
 </body>
