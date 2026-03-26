@@ -80,7 +80,7 @@
         .subtitle { color: var(--rose-gold); font-size: 1rem; font-weight: 700; margin-bottom: 20px; display: block; }
         .section-label { font-weight: 800; color: var(--rose-gold); margin-bottom: 10px; font-size: 1rem; }
         
-        .avatar-grid {
+        #avatar-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
@@ -95,17 +95,17 @@
         }
 
         .avatar-item {
-            font-size: 1.8rem;
+            font-size: 2rem;
             padding: 10px;
             border: 2px solid transparent;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.2s;
             background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .avatar-item.selected { border-color: var(--gold); background: var(--blush-pink); transform: scale(1.1); }
         .avatar-item.taken { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
@@ -120,6 +120,7 @@
             text-align: center;
             outline: none;
             font-weight: 700;
+            color: var(--deep-rose);
         }
 
         .btn {
@@ -133,7 +134,9 @@
             width: 100%;
             font-weight: 800;
             box-shadow: 0 10px 20px rgba(136, 14, 79, 0.15);
+            transition: all 0.3s;
         }
+        .btn:active { transform: scale(0.95); opacity: 0.9; }
 
         #live-rankings {
             background: white;
@@ -143,6 +146,7 @@
             display: flex;
             justify-content: space-around;
             border: 1px solid var(--blush-pink);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
         }
         .rank-item { display: flex; flex-direction: column; align-items: center; font-weight: 800; color: var(--deep-rose); font-size: 0.75rem; }
         .rank-avatar { font-size: 1.3rem; margin-bottom: 2px; }
@@ -153,7 +157,10 @@
             margin-bottom: 20px; 
             color: #222; 
             line-height: 1.3;
-            min-height: 60px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .options-grid { display: grid; gap: 10px; }
@@ -165,7 +172,9 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s;
             color: #444;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         .option-btn:hover { border-color: var(--rose-gold); background: #fffcfc; }
         .tf-btn-true { border-color: #a5d6a7; color: #2e7d32; }
@@ -184,29 +193,26 @@
         .leaderboard-item.top { background: var(--blush-pink); font-weight: 800; border-radius: 15px; color: var(--deep-rose); }
 
         @media (max-width: 480px) {
-            .avatar-grid { grid-template-columns: repeat(3, 1fr); }
             h1 { font-size: 1.8rem; }
+            #avatar-grid { grid-template-columns: repeat(3, 1fr); min-height: 200px; }
+            .question-text { font-size: 1.3rem; }
+            .option-btn { padding: 14px; font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
     <div id="game-wrapper">
-        <button id="vol-toggle" class="volume-btn" onclick="window.toggleMute()">🔊</button>
+        <button id="vol-toggle" class="volume-btn">🔊</button>
 
         <div id="login-screen" class="screen active">
             <h1>הטריוויה של נטי</h1>
             <span class="subtitle">נראה מי באמת מכירה את נטי</span>
-            <div id="error-msg" style="color: var(--deep-rose); margin-bottom: 10px; display: none; font-weight: 800; font-size: 0.9rem;"></div>
-            
+            <div id="error-msg" style="color: var(--deep-rose); margin-bottom: 10px; display: none; font-weight: 800; font-size: 0.9rem; padding: 5px; border: 1px solid var(--blush-pink); border-radius: 10px;"></div>
             <input type="text" id="player-name" placeholder="השם שלך..." maxlength="12">
-            
             <div class="section-label">בחרי דמות וצאי לדרך:</div>
-            <div class="avatar-grid" id="avatar-grid">
-                <!-- יתמלא על ידי JavaScript -->
-            </div>
-            
-            <button class="btn" id="join-btn" onclick="window.joinGame()">התחל משחק</button>
+            <div id="avatar-grid"></div>
+            <button class="btn" id="join-btn">התחל משחק</button>
         </div>
 
         <div id="quiz-screen" class="screen">
@@ -242,7 +248,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-mitzvah-v13-final';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nati-v14-ultra-fix';
 
         const music = document.getElementById('bg-music');
         let userName = "", selectedAvatar = "", currentScore = 0, currentQIndex = 0;
@@ -275,11 +281,6 @@
             { q: "נכון או לא נכון: נולדתי ביערות הגשם", opts: ["נכון", "לא נכון"], ans: 1, type: "tf" }
         ];
 
-        window.toggleMute = () => {
-            music.muted = !music.muted;
-            document.getElementById('vol-toggle').innerText = music.muted ? "🔇" : "🔊";
-        };
-
         function renderAvatars() {
             const grid = document.getElementById('avatar-grid');
             if (!grid) return;
@@ -289,38 +290,55 @@
                 const div = document.createElement('div');
                 div.className = `avatar-item ${selectedAvatar === av ? 'selected' : ''} ${isTaken ? 'taken' : ''}`;
                 div.innerText = av;
-                if (!isTaken) div.onclick = () => { 
-                    selectedAvatar = av; 
-                    renderAvatars(); 
-                };
+                if (!isTaken) {
+                    div.addEventListener('click', () => {
+                        selectedAvatar = av;
+                        renderAvatars();
+                    });
+                }
                 grid.appendChild(div);
             });
         }
 
-        window.joinGame = async () => {
+        const handleJoin = async () => {
             const nameInput = document.getElementById('player-name');
             const name = nameInput.value.trim();
-            if (!name) { showError("כתבי שם קודם!"); return; }
-            if (!selectedAvatar) { showError("בחרי דמות!"); return; }
-            if (!auth.currentUser) { showError("מתחבר לשרת..."); return; }
+            if (!name) { showError("בבקשה תכתבי את השם שלך"); return; }
+            if (!selectedAvatar) { showError("בבקשה תבחרי דמות יפה"); return; }
+            
+            if (!auth.currentUser) {
+                showError("מתחבר לשרת... נסי שוב בעוד רגע");
+                return;
+            }
 
             userName = name;
-            const btn = document.getElementById('join-btn');
-            btn.disabled = true; btn.innerText = "...";
+            const joinBtn = document.getElementById('join-btn');
+            joinBtn.disabled = true;
+            joinBtn.innerText = "מתחבר...";
 
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), {
                     name: userName, avatar: selectedAvatar, score: 0, timestamp: Date.now()
                 });
-                music.volume = 0.1; music.play().catch(()=>{});
+                music.volume = 0.1;
+                music.play().catch(() => {});
                 showScreen('quiz-screen');
                 loadQuestion();
-            } catch(e) { console.error(e); btn.disabled = false; btn.innerText = "התחל משחק"; }
+            } catch(e) {
+                console.error(e);
+                joinBtn.disabled = false;
+                joinBtn.innerText = "התחל משחק";
+                showError("שגיאה בחיבור למסד הנתונים");
+            }
         };
 
         function showError(msg) {
             const e = document.getElementById('error-msg');
-            if(e) { e.innerText = msg; e.style.display = 'block'; setTimeout(() => { if(e) e.style.display = 'none'; }, 3000); }
+            if(e) { 
+                e.innerText = msg; 
+                e.style.display = 'block'; 
+                setTimeout(() => { if(e) e.style.display = 'none'; }, 4000); 
+            }
         }
 
         function showScreen(id) {
@@ -333,9 +351,13 @@
         function loadQuestion() {
             if (currentQIndex >= questions.length) { finishGame(); return; }
             const q = questions[currentQIndex];
-            document.getElementById('q-counter').innerText = `שאלה ${currentQIndex + 1} / ${questions.length}`;
-            document.getElementById('question-text').innerText = q.q;
+            const qCounter = document.getElementById('q-counter');
+            if(qCounter) qCounter.innerText = `שאלה ${currentQIndex + 1} מתוך ${questions.length}`;
+            const qText = document.getElementById('question-text');
+            if(qText) qText.innerText = q.q;
+            
             const container = document.getElementById('options-container');
+            if(!container) return;
             container.innerHTML = '';
             q.opts.forEach((opt, idx) => {
                 const b = document.createElement('button');
@@ -348,16 +370,21 @@
         }
 
         async function selectAnswer(idx) {
-            if (idx === questions[currentQIndex].ans) currentScore++;
+            if (idx === questions[currentQIndex].ans) {
+                currentScore++;
+            }
             const percent = Math.round((currentScore / questions.length) * 100);
             if (auth.currentUser) {
-                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), { score: percent }); } catch (e) {}
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'players', auth.currentUser.uid), { score: percent });
+                } catch (e) { console.error("Update score error:", e); }
             }
             currentQIndex++;
             loadQuestion();
         }
 
         function startSync() {
+            if (!auth.currentUser) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'players');
             onSnapshot(colRef, (snap) => {
                 const players = [];
@@ -373,7 +400,7 @@
                     const el = document.getElementById(`rank-${i}`);
                     if (el) {
                         if (players[i-1]) {
-                            el.children[1].innerText = players[i-1].avatar;
+                            el.children[1].innerText = players[i-1].avatar || "❓";
                             el.children[2].innerText = `${players[i-1].name} (${players[i-1].score}%)`;
                         } else {
                             el.children[1].innerText = "-";
@@ -390,36 +417,58 @@
                         </div>
                     `).join('');
                 }
-            });
+            }, (error) => console.error("Sync Error:", error));
         }
 
         async function finishGame() {
             showScreen('end-screen');
             const percent = Math.round((currentScore / questions.length) * 100);
-            document.getElementById('personal-result').innerText = `${userName}, סיימת עם ${percent}%!`;
-            for(let i=0; i<40; i++) setTimeout(createConfetti, i*50);
+            const resText = document.getElementById('personal-result');
+            if(resText) resText.innerText = `${userName}, הציון הסופי שלך הוא ${percent}%!`;
+            
+            const confettiColors = ['#f4dada', '#b76e79', '#d4af37', '#880e4f'];
+            for(let i=0; i<50; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.cssText = `position:fixed; width:10px; height:10px; border-radius:50%; z-index:1000; top:-10px; left:${Math.random()*100}vw; background:${confettiColors[Math.floor(Math.random()*4)]}; animation:fall ${Math.random()*2+2}s linear forwards;`;
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 4000);
+                }, i * 60);
+            }
         }
 
-        function createConfetti() {
-            const c = document.createElement('div');
-            c.className = 'confetti';
-            c.style.cssText = `position:fixed; width:10px; height:10px; border-radius:50%; z-index:1000; top:-10px; left:${Math.random()*100}vw; background:${['#f4dada', '#b76e79', '#d4af37'][Math.floor(Math.random()*3)]}; animation:fall ${Math.random()*2+2}s linear forwards;`;
-            document.body.appendChild(c);
-            setTimeout(() => c.remove(), 4000);
-        }
-
-        onAuthStateChanged(auth, (user) => { 
-            if (user && !syncInitialized) { syncInitialized = true; startSync(); }
+        // Setup Volume
+        document.getElementById('vol-toggle').addEventListener('click', () => {
+            music.muted = !music.muted;
+            document.getElementById('vol-toggle').innerText = music.muted ? "🔇" : "🔊";
         });
 
+        // Setup Join Button
+        document.getElementById('join-btn').addEventListener('click', handleJoin);
+
+        // Auth Sequence
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) { 
+                console.error("Auth Error:", error); 
+                showError("בעיית חיבור - נסי לרענן את הדף");
             }
         };
-        
+
+        onAuthStateChanged(auth, (user) => { 
+            if (user && !syncInitialized) {
+                syncInitialized = true;
+                startSync(); 
+            }
+        });
+
+        // Start App
         renderAvatars();
         initAuth();
     </script>
