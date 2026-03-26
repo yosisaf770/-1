@@ -75,7 +75,9 @@
         .screen.active { display: block; animation: softFade 0.6s ease-out; }
         @keyframes softFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { color: var(--deep-rose); font-family: 'Tinos', serif; font-size: 2.2rem; margin: 0 0 5px 0; }
+        /* CHANGED TO BLACK FOR VERIFICATION */
+        h1 { color: #000000; font-family: 'Tinos', serif; font-size: 2.2rem; margin: 0 0 5px 0; }
+        
         .subtitle { color: var(--rose-gold); font-size: 1rem; font-weight: 700; margin-bottom: 20px; display: block; }
         .section-label { font-weight: 800; color: var(--rose-gold); margin-bottom: 10px; font-size: 1rem; }
         
@@ -225,7 +227,7 @@
         </div>
 
         <div id="end-screen" class="screen">
-            <h1 style="font-size: 2rem;">התוצאות</h1>
+            <h1 style="font-size: 2rem; color: #000;">התוצאות</h1>
             <p id="personal-result" style="color: var(--deep-rose); font-size: 1.3rem; font-weight: 800; margin: 15px 0;"></p>
             <div class="leaderboard" id="leaderboard-list">טוען נתונים...</div>
             <button class="btn" style="margin-top:20px; background: white; color: var(--rose-gold); border: 2px solid var(--rose-gold);" onclick="location.reload()">חזרה להתחלה</button>
@@ -241,7 +243,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global configuration with fallbacks
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -279,7 +280,6 @@
             { q: "נכון או לא נכון: נולדתי ביערות הגשם", opts: ["נכון", "לא נכון"], ans: 1, type: "tf" }
         ];
 
-        // Ensure functions are global
         window.toggleMute = () => {
             music.muted = !music.muted;
             document.getElementById('vol-toggle').innerText = music.muted ? "🔇" : "🔊";
@@ -457,7 +457,6 @@
             }
         }
 
-        // Initialize sequence
         onAuthStateChanged(auth, (user) => { 
             if (user && !syncInitialized) {
                 syncInitialized = true;
@@ -465,9 +464,10 @@
             }
         });
 
-        // Immediate first render
-        renderAvatars();
-        initAuth();
+        window.addEventListener('load', () => {
+            renderAvatars();
+            initAuth();
+        });
     </script>
 </body>
 </html>
