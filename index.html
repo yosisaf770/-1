@@ -15,16 +15,13 @@ const apiKey = "";
 const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
 
 const App = () => {
-  // מצב האפליקציה (State)
   const [foods, setFoods] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // יעדים קבועים (150 חלבון, 150 פחמימה, 65 שומן)
   const targets = { protein: 150, carbs: 150, fat: 65 };
 
-  // חישוב ערכים תזונתיים מצטברים
   const totals = useMemo(() => {
     return foods.reduce((acc, food) => ({
       protein: acc.protein + (Number(food.protein) || 0),
@@ -38,16 +35,12 @@ const App = () => {
     }), { protein: 0, carbs: 0, fat: 0, calories: 0 });
   }, [foods]);
 
-  // פונקציית ניתוח המאכל באמצעות ה-AI
   const analyzeFood = async () => {
     if (!inputValue.trim()) return;
-    
     setIsLoading(true);
     setError(null);
 
-    const systemPrompt = `You are a professional nutrition analyst.
-    Return ONLY a JSON object for the food input with: "name" (Hebrew), "protein", "carbs", "fat" (numbers).
-    Example: "steak 200g" -> {"name": "סטייק 200 גרם", "protein": 50, "carbs": 0, "fat": 30}`;
+    const systemPrompt = `You are a professional nutrition analyst. Return ONLY a JSON object for the food input with: "name" (Hebrew), "protein", "carbs", "fat" (numbers).`;
     
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`, {
@@ -60,8 +53,7 @@ const App = () => {
         })
       });
 
-      if (!response.ok) throw new Error("Connection Error");
-      
+      if (!response.ok) throw new Error();
       const result = await response.json();
       const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
@@ -69,40 +61,30 @@ const App = () => {
         const data = JSON.parse(rawText);
         setFoods(prev => [...prev, { ...data, id: Date.now() }]);
         setInputValue('');
-      } else {
-        throw new Error("Invalid Response");
       }
     } catch (err) {
-      setError("לא הצלחתי לנתח את המאכל. נסה שוב או פרט יותר (למשל: '100 גרם עוף').");
+      setError("לא הצלחתי לנתח את המאכל. נסה שוב.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const removeFood = (id) => setFoods(foods.filter(f => f.id !== id));
-  
-  const resetDay = () => {
-    if (window.confirm("האם לאפס את כל המאכלים מהרשימה?")) {
-      setFoods([]);
-    }
-  };
 
-  // רכיב פס התקדמות פנימי
-  const ProgressBar = ({ current, target, label, barColor }) => {
+  const ProgressBar = ({ current, target, label, colorClass }) => {
     const percentage = Math.min((current / target) * 100, 100);
     const isOver = current > target;
-    
     return (
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2 px-1">
-          <span className="text-sm font-bold text-slate-800">{label}</span>
-          <span className={`text-sm font-bold ${isOver ? 'text-red-600' : 'text-slate-900'}`}>
-            {current.toFixed(0)} <span className="text-slate-400 font-normal">/ {target}ג'</span>
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs font-bold text-slate-700">{label}</span>
+          <span className={`text-xs font-bold ${isOver ? 'text-red-500' : 'text-slate-900'}`}>
+            {current.toFixed(0)} / {target}ג'
           </span>
         </div>
-        <div className="h-4 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner border border-slate-300">
+        <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
           <div 
-            className={`h-full transition-all duration-1000 ease-out rounded-full ${isOver ? 'bg-red-500 shadow-sm' : barColor}`}
+            className={`h-full transition-all duration-700 ease-out ${isOver ? 'bg-red-500' : colorClass}`}
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -111,124 +93,81 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 p-4 md:p-10 font-sans" dir="rtl">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans" dir="rtl">
+      <div className="max-w-md mx-auto">
         
-        {/* כרטיסיית סיכום ראשית */}
-        <header className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-white mb-8 transition-all hover:shadow-2xl">
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="text-blue-600" size={24} />
-                <h1 className="text-3xl font-black text-slate-800">היום שלי</h1>
-              </div>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">סיכום ערכים יומי</p>
-            </div>
-            <div className="bg-slate-900 text-white p-5 rounded-[2rem] text-center min-w-[110px] shadow-lg">
-              <Flame size={24} className="mx-auto mb-1 text-orange-400" />
-              <div className="text-2xl font-black">{Math.round(totals.calories)}</div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">קלוריות</p>
+        {/* כרטיסיית סיכום */}
+        <header className="bg-white rounded-3xl p-6 shadow-lg border border-slate-200 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+              <Sparkles className="text-blue-500" size={20} />
+              התזונה שלי
+            </h1>
+            <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl flex items-center gap-2">
+              <Flame size={16} className="text-orange-400" />
+              <span className="font-bold">{Math.round(totals.calories)}</span>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <ProgressBar current={totals.protein} target={targets.protein} label="חלבון" barColor="bg-blue-600" />
-            <ProgressBar current={totals.carbs} target={targets.carbs} label="פחמימות" barColor="bg-amber-500" />
-            <ProgressBar current={totals.fat} target={targets.fat} label="שומן" barColor="bg-emerald-600" />
-          </div>
+          <ProgressBar current={totals.protein} target={targets.protein} label="חלבון" colorClass="bg-blue-600" />
+          <ProgressBar current={totals.carbs} target={targets.carbs} label="פחמימות" colorClass="bg-amber-500" />
+          <ProgressBar current={totals.fat} target={targets.fat} label="שומן" colorClass="bg-emerald-600" />
 
-          <div className="mt-4 flex justify-end">
-            <button 
-              onClick={resetDay} 
-              className="text-slate-400 hover:text-red-500 transition-all text-xs font-bold flex items-center gap-2 py-2 px-4 rounded-xl hover:bg-slate-50"
-            >
-              <RotateCcw size={14} /> איפוס יום
-            </button>
-          </div>
+          <button onClick={() => setFoods([])} className="mt-2 text-slate-400 hover:text-red-500 text-[10px] flex items-center gap-1">
+            <RotateCcw size={12} /> איפוס יום
+          </button>
         </header>
 
-        {/* תיבת הזנה חכמה */}
-        <section className="bg-white rounded-[2.5rem] p-8 shadow-lg border border-white mb-8 focus-within:shadow-2xl transition-all">
-          <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-            <Plus size={24} className="text-blue-600" />
-            מה אכלת עכשיו?
-          </h2>
-          <div className="relative">
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="למשל: סלט עוף, או 2 ביצים ופרוסת לחם..."
-              className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-6 text-lg outline-none focus:border-blue-500 focus:bg-white transition-all min-h-[140px] resize-none shadow-inner"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  analyzeFood();
-                }
-              }}
-            />
-            <button 
-              onClick={analyzeFood}
-              disabled={isLoading || !inputValue.trim()}
-              className="absolute bottom-5 left-5 bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-sm transition-all hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 shadow-xl flex items-center gap-3 active:scale-95"
-            >
-              {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'הוספה'}
-            </button>
-          </div>
-          {error && (
-            <div className="mt-4 text-red-600 text-xs font-bold flex items-center gap-2 px-4 py-3 bg-red-50 rounded-2xl border border-red-100 animate-in fade-in">
-              <AlertCircle size={18}/> {error}
-            </div>
-          )}
+        {/* הזנת מאכל */}
+        <section className="bg-white rounded-3xl p-6 shadow-md border border-slate-200 mb-6">
+          <textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="מה אכלת? (למשל: 2 ביצים ופרוסת לחם)"
+            className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm outline-none focus:border-blue-500 transition-all min-h-[100px] mb-4"
+          />
+          <button 
+            onClick={analyzeFood}
+            disabled={isLoading || !inputValue.trim()}
+            className="w-full bg-blue-600 text-white font-bold py-3 rounded-2xl hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+          >
+            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+            <span>הוספת מאכל</span>
+          </button>
+          {error && <p className="text-red-500 text-[10px] mt-2 font-bold">{error}</p>}
         </section>
 
-        {/* רשימת המאכלים שנוספו */}
-        <div className="space-y-4 pb-24">
-          <div className="flex justify-between items-center px-6 mb-2">
-            <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">יומן מאכלים</h3>
-            <span className="bg-white text-slate-400 text-[10px] font-black px-3 py-1 rounded-full border border-slate-100">
-              {foods.length} פריטים
-            </span>
-          </div>
-          
+        {/* רשימה */}
+        <div className="space-y-3">
           {foods.length === 0 ? (
-            <div className="py-24 text-center border-4 border-dashed border-slate-200 rounded-[3rem] text-slate-300 flex flex-col items-center">
-              <BookOpen size={64} className="mb-4 opacity-10" />
-              <p className="text-lg font-bold">היומן שלך ריק להיום</p>
-              <p className="text-sm opacity-60 mt-1">הקלד מאכל למעלה כדי להתחיל</p>
+            <div className="text-center py-10 text-slate-300 font-bold border-2 border-dashed border-slate-200 rounded-3xl">
+              <BookOpen size={24} className="mx-auto mb-2 opacity-20" />
+              <p>היומן ריק</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {foods.map(food => (
-                <div key={food.id} className="bg-white border border-slate-200 p-6 rounded-[2.5rem] flex justify-between items-center group transition-all hover:shadow-xl hover:scale-[1.01] border-r-8 border-r-blue-500">
-                  <div className="flex-1">
-                    <h4 className="text-xl font-bold text-slate-800 mb-3">{food.name}</h4>
-                    <div className="flex flex-wrap gap-4 text-xs font-black">
-                      <span className="text-blue-600 bg-blue-50 px-3 py-1 rounded-full">חלבון: {food.protein}ג'</span>
-                      <span className="text-amber-600 bg-amber-50 px-3 py-1 rounded-full">פחמימה: {food.carbs}ג'</span>
-                      <span className="text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">שומן: {food.fat}ג'</span>
-                    </div>
+            foods.map(food => (
+              <div key={food.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center group">
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">{food.name}</h4>
+                  <div className="flex gap-2 text-[10px] text-slate-400 font-bold mt-1">
+                    <span>ח: {food.protein}</span>
+                    <span>פ: {food.carbs}</span>
+                    <span>ש: {food.fat}</span>
                   </div>
-                  <button 
-                    onClick={() => removeFood(food.id)} 
-                    className="p-4 text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all rounded-2xl opacity-0 group-hover:opacity-100"
-                    title="מחיקה"
-                  >
-                    <Trash2 size={24} />
-                  </button>
                 </div>
-              )).reverse()}
-            </div>
+                <button onClick={() => removeFood(food.id)} className="text-slate-200 hover:text-red-500 p-2">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )).reverse()
           )}
         </div>
 
-        {/* הודעת הגעה ליעד */}
+        {/* יעד הושג */}
         {totals.protein >= targets.protein && totals.carbs >= targets.carbs && totals.fat >= targets.fat && (
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-10 py-6 rounded-[2.5rem] shadow-2xl flex items-center gap-5 animate-bounce z-50 border-2 border-white/20">
-            <CheckCircle2 size={32} />
-            <div className="flex flex-col">
-              <span className="font-black text-xl">הגעת ליעד היומי!</span>
-              <span className="text-xs font-bold opacity-80 uppercase tracking-widest">התזונה מאוזנת ומלאה</span>
-            </div>
+          <div className="mt-6 bg-emerald-600 text-white p-4 rounded-2xl flex items-center gap-3 animate-bounce shadow-lg shadow-emerald-200">
+            <CheckCircle2 size={24} />
+            <span className="font-bold">כל היעדים הושלמו!</span>
           </div>
         )}
       </div>
