@@ -15,13 +15,16 @@ const apiKey = "";
 const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
 
 const App = () => {
+  // מצב האפליקציה
   const [foods, setFoods] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // יעדים קבועים: 150 חלבון, 150 פחמימה, 65 שומן
   const targets = { protein: 150, carbs: 150, fat: 65 };
 
+  // חישוב ערכים תזונתיים
   const totals = useMemo(() => {
     return foods.reduce((acc, food) => ({
       protein: acc.protein + (Number(food.protein) || 0),
@@ -35,6 +38,7 @@ const App = () => {
     }), { protein: 0, carbs: 0, fat: 0, calories: 0 });
   }, [foods]);
 
+  // ניתוח מאכלים באמצעות AI
   const analyzeFood = async () => {
     if (!inputValue.trim()) return;
     setIsLoading(true);
@@ -71,6 +75,7 @@ const App = () => {
 
   const removeFood = (id) => setFoods(foods.filter(f => f.id !== id));
 
+  // רכיב פס התקדמות
   const ProgressBar = ({ current, target, label, colorClass }) => {
     const percentage = Math.min((current / target) * 100, 100);
     const isOver = current > target;
@@ -137,7 +142,7 @@ const App = () => {
           {error && <p className="text-red-500 text-[10px] mt-2 font-bold">{error}</p>}
         </section>
 
-        {/* רשימה */}
+        {/* רשימת מאכלים */}
         <div className="space-y-3">
           {foods.length === 0 ? (
             <div className="text-center py-10 text-slate-300 font-bold border-2 border-dashed border-slate-200 rounded-3xl">
@@ -147,15 +152,15 @@ const App = () => {
           ) : (
             foods.map(food => (
               <div key={food.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center group">
-                <div>
+                <div className="flex-1">
                   <h4 className="font-bold text-slate-800 text-sm">{food.name}</h4>
                   <div className="flex gap-2 text-[10px] text-slate-400 font-bold mt-1">
-                    <span>ח: {food.protein}</span>
-                    <span>פ: {food.carbs}</span>
-                    <span>ש: {food.fat}</span>
+                    <span>חלבון: {food.protein}</span>
+                    <span>פחמימה: {food.carbs}</span>
+                    <span>שומן: {food.fat}</span>
                   </div>
                 </div>
-                <button onClick={() => removeFood(food.id)} className="text-slate-200 hover:text-red-500 p-2">
+                <button onClick={() => removeFood(food.id)} className="text-slate-200 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -163,7 +168,7 @@ const App = () => {
           )}
         </div>
 
-        {/* יעד הושג */}
+        {/* חיווי הגעה ליעד */}
         {totals.protein >= targets.protein && totals.carbs >= targets.carbs && totals.fat >= targets.fat && (
           <div className="mt-6 bg-emerald-600 text-white p-4 rounded-2xl flex items-center gap-3 animate-bounce shadow-lg shadow-emerald-200">
             <CheckCircle2 size={24} />
