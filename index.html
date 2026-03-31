@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Plus, Trash2, Utensils, Flame, AlertCircle, CheckCircle2, 
-  RotateCcw, Loader2, Sparkles, BookOpen, Settings, X, 
-  Palette, Moon, Sun, Coffee, Leaf, Droplets, Zap, Heart
+  Plus, 
+  Trash2, 
+  Utensils, 
+  Flame, 
+  AlertCircle, 
+  CheckCircle2, 
+  RotateCcw, 
+  Loader2, 
+  Sparkles, 
+  BookOpen, 
+  Settings, 
+  X, 
+  Palette, 
+  Moon, 
+  Sun, 
+  Coffee, 
+  Leaf, 
+  Droplets, 
+  Zap, 
+  Heart 
 } from 'lucide-react';
 
 const apiKey = "";
@@ -41,7 +58,6 @@ const App = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const theme = THEMES[currentThemeKey];
-
   const targets = { protein: 150, carbs: 150, fat: 65 };
 
   const totals = useMemo(() => {
@@ -110,7 +126,7 @@ const App = () => {
     <div className={`min-h-screen ${theme.bg} p-4 md:p-8 font-sans transition-colors duration-500 flex flex-col items-center`} dir="rtl">
       <div className="w-full max-w-xl relative">
         
-        {/* Settings Button */}
+        {/* כפתור הגדרות */}
         <button 
           onClick={() => setIsSettingsOpen(true)}
           className={`fixed top-4 left-4 p-4 rounded-2xl ${theme.card} border z-40 hover:scale-110 active:scale-95 transition-all shadow-xl`}
@@ -118,7 +134,7 @@ const App = () => {
           <Settings size={24} className={theme.text} />
         </button>
 
-        {/* Settings Panel */}
+        {/* חלונית הגדרות */}
         {isSettingsOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
             <div className={`w-full max-w-md bg-white border rounded-[2.5rem] p-8 max-h-[85vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)]`}>
@@ -126,7 +142,9 @@ const App = () => {
                 <h2 className="text-2xl font-black flex items-center gap-2 text-slate-900">
                   <Palette size={24} className="text-blue-600" /> בחר עיצוב
                 </h2>
-                <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={24} /></button>
+                <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                  <X size={24} />
+                </button>
               </div>
               <div className="overflow-y-auto grid grid-cols-2 gap-4 p-1 custom-scrollbar">
                 {Object.entries(THEMES).map(([key, t]) => (
@@ -150,7 +168,7 @@ const App = () => {
           </div>
         )}
 
-        {/* Header Dashboard */}
+        {/* לוח בקרה ראשי */}
         <header className={`${theme.card} border rounded-[3rem] p-8 mb-8 relative transition-all`}>
           <div className="flex justify-between items-start mb-8">
             <div>
@@ -178,7 +196,7 @@ const App = () => {
           </button>
         </header>
 
-        {/* Input Area */}
+        {/* אזור הזנה */}
         <section className={`${theme.card} border rounded-[2.5rem] p-7 mb-8 transition-all`}>
           <h2 className={`text-base font-black mb-5 px-1 flex items-center gap-2 ${theme.text}`}>
             <Plus size={20} /> מה אכלת עכשיו?
@@ -202,7 +220,7 @@ const App = () => {
           {error && <div className="mt-4 text-rose-500 text-xs font-bold flex items-center gap-2 px-3 py-2 bg-rose-500/10 rounded-xl animate-shake"><AlertCircle size={16}/>{error}</div>}
         </section>
 
-        {/* Log List */}
+        {/* פירוט מאכלים */}
         <div className="space-y-4 pb-20">
           <div className="flex justify-between items-center px-6 mb-2">
             <h3 className={`text-sm font-black ${theme.secondary} uppercase tracking-widest`}>פירוט מאכלים</h3>
@@ -233,7 +251,7 @@ const App = () => {
           )}
         </div>
 
-        {/* Victory Celebration */}
+        {/* חגיגת ניצחון */}
         {totals.protein >= targets.protein && totals.carbs >= targets.carbs && totals.fat >= targets.fat && (
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-10 py-5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(5,150,105,0.4)] flex items-center gap-4 animate-bounce z-50 border-2 border-white/20">
             <CheckCircle2 size={28} />
