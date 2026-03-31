@@ -25,7 +25,7 @@ import {
 const apiKey = "";
 const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
 
-// הגדרת 20 ערכות נושא עם ניגודיות גבוהה בין רקע לכרטיסיות
+// הגדרת 20 ערכות נושא עם ניגודיות גבוהה
 const THEMES = {
   classic: { 
     name: 'בהיר קלאסי', 
@@ -33,7 +33,7 @@ const THEMES = {
     card: 'bg-white border-white shadow-lg', 
     text: 'text-slate-900', 
     secondary: 'text-slate-500', 
-    accent: 'bg-blue-600', 
+    accent: 'bg-blue-600 text-white', 
     input: 'bg-slate-50', 
     p: 'bg-blue-600', 
     c: 'bg-amber-500', 
@@ -45,7 +45,7 @@ const THEMES = {
     card: 'bg-slate-800 border-slate-700 shadow-2xl', 
     text: 'text-slate-100', 
     secondary: 'text-slate-400', 
-    accent: 'bg-indigo-500', 
+    accent: 'bg-indigo-500 text-white', 
     input: 'bg-slate-900', 
     p: 'bg-cyan-400', 
     c: 'bg-orange-400', 
@@ -57,7 +57,7 @@ const THEMES = {
     card: 'bg-sky-100 border-white shadow-xl', 
     text: 'text-sky-900', 
     secondary: 'text-sky-600', 
-    accent: 'bg-sky-700', 
+    accent: 'bg-sky-700 text-white', 
     input: 'bg-white', 
     p: 'bg-blue-600', 
     c: 'bg-teal-500', 
@@ -75,18 +75,6 @@ const THEMES = {
     c: 'bg-yellow-400', 
     f: 'bg-emerald-400' 
   },
-  sunset: { 
-    name: 'שקיעה', 
-    bg: 'bg-orange-100', 
-    card: 'bg-white border-white shadow-xl', 
-    text: 'text-orange-950', 
-    secondary: 'text-orange-500', 
-    accent: 'bg-rose-600', 
-    input: 'bg-orange-50', 
-    p: 'bg-rose-500', 
-    c: 'bg-orange-500', 
-    f: 'bg-amber-500' 
-  },
   cyber: { 
     name: 'סייברפאנק', 
     bg: 'bg-black', 
@@ -99,37 +87,13 @@ const THEMES = {
     c: 'bg-cyan-400', 
     f: 'bg-yellow-400' 
   },
-  lavender: { 
-    name: 'לבנדר', 
-    bg: 'bg-purple-100', 
-    card: 'bg-white border-white shadow-xl', 
-    text: 'text-purple-950', 
-    secondary: 'text-purple-400', 
-    accent: 'bg-purple-700', 
-    input: 'bg-purple-50', 
-    p: 'bg-purple-600', 
-    c: 'bg-fuchsia-500', 
-    f: 'bg-indigo-500' 
-  },
-  minimal: { 
-    name: 'מינימליזם', 
-    bg: 'bg-zinc-50', 
-    card: 'bg-white border-zinc-200 shadow-sm', 
-    text: 'text-zinc-900', 
-    secondary: 'text-zinc-400', 
-    accent: 'bg-black', 
-    input: 'bg-zinc-50', 
-    p: 'bg-zinc-800', 
-    c: 'bg-zinc-600', 
-    f: 'bg-zinc-400' 
-  },
   coffee: { 
     name: 'קפה בוקר', 
     bg: 'bg-[#D7CCC8]', 
     card: 'bg-white border-white shadow-lg', 
     text: 'text-[#3E2723]', 
     secondary: 'text-[#8D6E63]', 
-    accent: 'bg-[#5D4037]', 
+    accent: 'bg-[#5D4037] text-white', 
     input: 'bg-[#EFEBE9]', 
     p: 'bg-[#795548]', 
     c: 'bg-[#A1887F]', 
@@ -141,23 +105,11 @@ const THEMES = {
     card: 'bg-amber-50 border-amber-200 shadow-2xl', 
     text: 'text-slate-900', 
     secondary: 'text-amber-800', 
-    accent: 'bg-blue-800', 
+    accent: 'bg-blue-800 text-white', 
     input: 'bg-white', 
     p: 'bg-blue-700', 
     c: 'bg-amber-600', 
     f: 'bg-red-800' 
-  },
-  berry: { 
-    name: 'פירות יער', 
-    bg: 'bg-rose-50', 
-    card: 'bg-rose-900 border-rose-800 shadow-xl', 
-    text: 'text-white', 
-    secondary: 'text-rose-300', 
-    accent: 'bg-fuchsia-400', 
-    input: 'bg-rose-950', 
-    p: 'bg-rose-500', 
-    c: 'bg-fuchsia-400', 
-    f: 'bg-purple-400' 
   },
   mint: { 
     name: 'מנטה רענן', 
@@ -165,11 +117,83 @@ const THEMES = {
     card: 'bg-white border-white shadow-lg', 
     text: 'text-teal-950', 
     secondary: 'text-teal-500', 
-    accent: 'bg-teal-700', 
+    accent: 'bg-teal-700 text-white', 
     input: 'bg-teal-50', 
     p: 'bg-teal-600', 
     c: 'bg-emerald-500', 
     f: 'bg-cyan-600' 
+  },
+  midnight: { 
+    name: 'חצות', 
+    bg: 'bg-black', 
+    card: 'bg-indigo-950 border-indigo-900 shadow-2xl', 
+    text: 'text-indigo-50', 
+    secondary: 'text-indigo-400', 
+    accent: 'bg-indigo-500 text-white', 
+    input: 'bg-black', 
+    p: 'bg-indigo-400', 
+    c: 'bg-sky-400', 
+    f: 'bg-slate-500' 
+  },
+  sunset: { 
+    name: 'שקיעה', 
+    bg: 'bg-orange-100', 
+    card: 'bg-white border-white shadow-xl', 
+    text: 'text-orange-950', 
+    secondary: 'text-orange-500', 
+    accent: 'bg-rose-600 text-white', 
+    input: 'bg-orange-50', 
+    p: 'bg-rose-500', 
+    c: 'bg-orange-500', 
+    f: 'bg-amber-500' 
+  },
+  berry: { 
+    name: 'פירות יער', 
+    bg: 'bg-rose-50', 
+    card: 'bg-rose-900 border-rose-800 shadow-xl', 
+    text: 'text-white', 
+    secondary: 'text-rose-300', 
+    accent: 'bg-fuchsia-400 text-white', 
+    input: 'bg-rose-950', 
+    p: 'bg-rose-500', 
+    c: 'bg-fuchsia-400', 
+    f: 'bg-purple-400' 
+  },
+  minimal: { 
+    name: 'מינימליזם', 
+    bg: 'bg-zinc-50', 
+    card: 'bg-white border-zinc-200 shadow-sm', 
+    text: 'text-zinc-900', 
+    secondary: 'text-zinc-400', 
+    accent: 'bg-black text-white', 
+    input: 'bg-zinc-50', 
+    p: 'bg-zinc-800', 
+    c: 'bg-zinc-600', 
+    f: 'bg-zinc-400' 
+  },
+  neon: { 
+    name: 'לילה ניאון', 
+    bg: 'bg-slate-950', 
+    card: 'bg-black border-cyan-500 shadow-[0_0_20px_#06b6d4]', 
+    text: 'text-cyan-50', 
+    secondary: 'text-slate-600', 
+    accent: 'bg-purple-600 text-white', 
+    input: 'bg-slate-900', 
+    p: 'bg-purple-500', 
+    c: 'bg-cyan-500', 
+    f: 'bg-yellow-500' 
+  },
+  lavender: { 
+    name: 'לבנדר', 
+    bg: 'bg-purple-100', 
+    card: 'bg-white border-white shadow-xl', 
+    text: 'text-purple-950', 
+    secondary: 'text-purple-400', 
+    accent: 'bg-purple-700 text-white', 
+    input: 'bg-purple-50', 
+    p: 'bg-purple-600', 
+    c: 'bg-fuchsia-500', 
+    f: 'bg-indigo-500' 
   },
   slate: { 
     name: 'פלדה מודרנית', 
@@ -177,7 +201,7 @@ const THEMES = {
     card: 'bg-white border-white shadow-2xl', 
     text: 'text-slate-900', 
     secondary: 'text-slate-500', 
-    accent: 'bg-slate-800', 
+    accent: 'bg-slate-800 text-white', 
     input: 'bg-slate-50', 
     p: 'bg-slate-700', 
     c: 'bg-blue-600', 
@@ -189,23 +213,11 @@ const THEMES = {
     card: 'bg-white border-amber-100 shadow-xl', 
     text: 'text-amber-950', 
     secondary: 'text-amber-700', 
-    accent: 'bg-amber-600', 
+    accent: 'bg-amber-600 text-white', 
     input: 'bg-amber-50/30', 
     p: 'bg-amber-600', 
     c: 'bg-orange-400', 
     f: 'bg-stone-500' 
-  },
-  midnight: { 
-    name: 'חצות', 
-    bg: 'bg-black', 
-    card: 'bg-indigo-950 border-indigo-900 shadow-[0_10px_30px_rgba(0,0,0,1)]', 
-    text: 'text-indigo-50', 
-    secondary: 'text-indigo-400', 
-    accent: 'bg-indigo-500', 
-    input: 'bg-black', 
-    p: 'bg-indigo-400', 
-    c: 'bg-sky-400', 
-    f: 'bg-slate-500' 
   },
   candy: { 
     name: 'סוכריות', 
@@ -213,7 +225,7 @@ const THEMES = {
     card: 'bg-pink-100 border-pink-200 shadow-lg', 
     text: 'text-pink-900', 
     secondary: 'text-pink-600', 
-    accent: 'bg-sky-500', 
+    accent: 'bg-sky-500 text-white', 
     input: 'bg-white', 
     p: 'bg-pink-500', 
     c: 'bg-sky-500', 
@@ -237,7 +249,7 @@ const THEMES = {
     card: 'bg-white border-white shadow-2xl', 
     text: 'text-red-950', 
     secondary: 'text-red-800', 
-    accent: 'bg-red-700', 
+    accent: 'bg-red-700 text-white', 
     input: 'bg-red-50', 
     p: 'bg-red-700', 
     c: 'bg-orange-600', 
@@ -249,23 +261,11 @@ const THEMES = {
     card: 'bg-white border-white shadow-2xl', 
     text: 'text-sky-950', 
     secondary: 'text-sky-500', 
-    accent: 'bg-sky-600', 
+    accent: 'bg-sky-600 text-white', 
     input: 'bg-sky-50', 
     p: 'bg-blue-600', 
     c: 'bg-sky-500', 
     f: 'bg-indigo-400' 
-  },
-  neon_night: { 
-    name: 'לילה ניאון', 
-    bg: 'bg-slate-950', 
-    card: 'bg-black border-cyan-500 shadow-[0_0_20px_#06b6d4]', 
-    text: 'text-cyan-50', 
-    secondary: 'text-slate-600', 
-    accent: 'bg-purple-600', 
-    input: 'bg-slate-900', 
-    p: 'bg-purple-500', 
-    c: 'bg-cyan-500', 
-    f: 'bg-yellow-500' 
   }
 };
 
@@ -356,17 +356,17 @@ const App = () => {
 
         {/* חלונית הגדרות */}
         {isSettingsOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-            <div className={`w-full max-w-md bg-white border rounded-[2.5rem] p-8 max-h-[85vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)]`}>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-black flex items-center gap-2 text-slate-900">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className={`w-full max-w-md bg-white border rounded-[2.5rem] p-8 max-h-[85vh] overflow-hidden flex flex-col shadow-2xl`}>
+              <div className="flex justify-between items-center mb-6 text-slate-900">
+                <h2 className="text-2xl font-black flex items-center gap-2">
                   <Palette size={24} className="text-blue-600" /> בחר עיצוב
                 </h2>
-                <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full">
                   <X size={24} />
                 </button>
               </div>
-              <div className="overflow-y-auto grid grid-cols-2 gap-4 p-1 custom-scrollbar">
+              <div className="overflow-y-auto grid grid-cols-2 gap-4 p-1">
                 {Object.entries(THEMES).map(([key, t]) => (
                   <button
                     key={key}
@@ -437,7 +437,7 @@ const App = () => {
               {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'הוספה'}
             </button>
           </div>
-          {error && <div className="mt-4 text-rose-500 text-xs font-bold flex items-center gap-2 px-3 py-2 bg-rose-500/10 rounded-xl animate-shake"><AlertCircle size={16}/>{error}</div>}
+          {error && <div className="mt-4 text-rose-500 text-xs font-bold flex items-center gap-2 px-3 py-2 bg-rose-500/10 rounded-xl"><AlertCircle size={16}/>{error}</div>}
         </section>
 
         {/* פירוט מאכלים */}
@@ -454,7 +454,7 @@ const App = () => {
             </div>
           ) : (
             foods.map(food => (
-              <div key={food.id} className={`${theme.card} border p-6 rounded-[2rem] flex justify-between items-center group animate-in slide-in-from-bottom-4 hover:scale-[1.02] transition-all`}>
+              <div key={food.id} className={`${theme.card} border p-6 rounded-[2rem] flex justify-between items-center group hover:scale-[1.02] transition-all`}>
                 <div className="flex-1">
                   <h4 className={`text-xl font-bold mb-3 ${theme.text}`}>{food.name}</h4>
                   <div className="flex flex-wrap gap-4 text-[11px] font-black uppercase">
@@ -473,7 +473,7 @@ const App = () => {
 
         {/* חגיגת ניצחון */}
         {totals.protein >= targets.protein && totals.carbs >= targets.carbs && totals.fat >= targets.fat && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-10 py-5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(5,150,105,0.4)] flex items-center gap-4 animate-bounce z-50 border-2 border-white/20">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl flex items-center gap-4 animate-bounce z-50 border-2 border-white/20">
             <CheckCircle2 size={28} />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tighter italic">הגעת ליעד!</span>
