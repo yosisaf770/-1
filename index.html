@@ -15,7 +15,7 @@ const apiKey = "";
 const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
 
 const App = () => {
-  // מצב האפליקציה
+  // מצב האפליקציה (State)
   const [foods, setFoods] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,19 +24,24 @@ const App = () => {
   // יעדים קבועים (150 חלבון, 150 פחמימה, 65 שומן)
   const targets = { protein: 150, carbs: 150, fat: 65 };
 
-  // חישוב סך הכל
+  // חישוב ערכים תזונתיים מצטברים
   const totals = useMemo(() => {
     return foods.reduce((acc, food) => ({
       protein: acc.protein + (Number(food.protein) || 0),
       carbs: acc.carbs + (Number(food.carbs) || 0),
       fat: acc.fat + (Number(food.fat) || 0),
-      calories: acc.calories + ((Number(food.protein) || 0) * 4 + (Number(food.carbs) || 0) * 4 + (Number(food.fat) || 0) * 9)
+      calories: acc.calories + (
+        (Number(food.protein) || 0) * 4 + 
+        (Number(food.carbs) || 0) * 4 + 
+        (Number(food.fat) || 0) * 9
+      )
     }), { protein: 0, carbs: 0, fat: 0, calories: 0 });
   }, [foods]);
 
-  // ניתוח מאכלים באמצעות ה-API
+  // פונקציית ניתוח המאכל באמצעות ה-AI
   const analyzeFood = async () => {
     if (!inputValue.trim()) return;
+    
     setIsLoading(true);
     setError(null);
 
@@ -64,9 +69,11 @@ const App = () => {
         const data = JSON.parse(rawText);
         setFoods(prev => [...prev, { ...data, id: Date.now() }]);
         setInputValue('');
+      } else {
+        throw new Error("Invalid Response");
       }
     } catch (err) {
-      setError("לא הצלחתי לנתח את המאכל. נסה שוב או פרט יותר.");
+      setError("לא הצלחתי לנתח את המאכל. נסה שוב או פרט יותר (למשל: '100 גרם עוף').");
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +87,7 @@ const App = () => {
     }
   };
 
-  // רכיב פס התקדמות
+  // רכיב פס התקדמות פנימי
   const ProgressBar = ({ current, target, label, barColor }) => {
     const percentage = Math.min((current / target) * 100, 100);
     const isOver = current > target;
@@ -93,9 +100,9 @@ const App = () => {
             {current.toFixed(0)} <span className="text-slate-400 font-normal">/ {target}ג'</span>
           </span>
         </div>
-        <div className="h-4 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+        <div className="h-4 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner border border-slate-300">
           <div 
-            className={`h-full transition-all duration-1000 ease-out rounded-full ${isOver ? 'bg-red-500' : barColor}`}
+            className={`h-full transition-all duration-1000 ease-out rounded-full ${isOver ? 'bg-red-500 shadow-sm' : barColor}`}
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -107,8 +114,8 @@ const App = () => {
     <div className="min-h-screen bg-slate-100 text-slate-900 p-4 md:p-10 font-sans" dir="rtl">
       <div className="max-w-xl mx-auto">
         
-        {/* כרטיסיית סיכום */}
-        <header className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-white mb-8">
+        {/* כרטיסיית סיכום ראשית */}
+        <header className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-white mb-8 transition-all hover:shadow-2xl">
           <div className="flex justify-between items-start mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -130,16 +137,18 @@ const App = () => {
             <ProgressBar current={totals.fat} target={targets.fat} label="שומן" barColor="bg-emerald-600" />
           </div>
 
-          <button 
-            onClick={resetDay} 
-            className="mt-6 text-slate-400 hover:text-red-500 transition-all text-xs font-bold flex items-center gap-2"
-          >
-            <RotateCcw size={14} /> איפוס יום
-          </button>
+          <div className="mt-4 flex justify-end">
+            <button 
+              onClick={resetDay} 
+              className="text-slate-400 hover:text-red-500 transition-all text-xs font-bold flex items-center gap-2 py-2 px-4 rounded-xl hover:bg-slate-50"
+            >
+              <RotateCcw size={14} /> איפוס יום
+            </button>
+          </div>
         </header>
 
-        {/* תיבת הזנה */}
-        <section className="bg-white rounded-[2.5rem] p-8 shadow-lg border border-white mb-8">
+        {/* תיבת הזנה חכמה */}
+        <section className="bg-white rounded-[2.5rem] p-8 shadow-lg border border-white mb-8 focus-within:shadow-2xl transition-all">
           <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
             <Plus size={24} className="text-blue-600" />
             מה אכלת עכשיו?
@@ -149,7 +158,7 @@ const App = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="למשל: סלט עוף, או 2 ביצים ופרוסת לחם..."
-              className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-6 text-lg outline-none focus:border-blue-500 focus:bg-white transition-all min-h-[140px] resize-none"
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-6 text-lg outline-none focus:border-blue-500 focus:bg-white transition-all min-h-[140px] resize-none shadow-inner"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -166,13 +175,13 @@ const App = () => {
             </button>
           </div>
           {error && (
-            <div className="mt-4 text-red-600 text-xs font-bold flex items-center gap-2 px-4 py-3 bg-red-50 rounded-2xl border border-red-100">
+            <div className="mt-4 text-red-600 text-xs font-bold flex items-center gap-2 px-4 py-3 bg-red-50 rounded-2xl border border-red-100 animate-in fade-in">
               <AlertCircle size={18}/> {error}
             </div>
           )}
         </section>
 
-        {/* רשימת המאכלים */}
+        {/* רשימת המאכלים שנוספו */}
         <div className="space-y-4 pb-24">
           <div className="flex justify-between items-center px-6 mb-2">
             <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">יומן מאכלים</h3>
@@ -182,14 +191,15 @@ const App = () => {
           </div>
           
           {foods.length === 0 ? (
-            <div className="py-24 text-center border-4 border-dashed border-slate-200 rounded-[3rem] text-slate-300">
-              <BookOpen size={64} className="mx-auto mb-4 opacity-10" />
+            <div className="py-24 text-center border-4 border-dashed border-slate-200 rounded-[3rem] text-slate-300 flex flex-col items-center">
+              <BookOpen size={64} className="mb-4 opacity-10" />
               <p className="text-lg font-bold">היומן שלך ריק להיום</p>
+              <p className="text-sm opacity-60 mt-1">הקלד מאכל למעלה כדי להתחיל</p>
             </div>
           ) : (
             <div className="space-y-4">
               {foods.map(food => (
-                <div key={food.id} className="bg-white border border-slate-100 p-6 rounded-[2.5rem] flex justify-between items-center group transition-all hover:shadow-xl hover:scale-[1.01]">
+                <div key={food.id} className="bg-white border border-slate-200 p-6 rounded-[2.5rem] flex justify-between items-center group transition-all hover:shadow-xl hover:scale-[1.01] border-r-8 border-r-blue-500">
                   <div className="flex-1">
                     <h4 className="text-xl font-bold text-slate-800 mb-3">{food.name}</h4>
                     <div className="flex flex-wrap gap-4 text-xs font-black">
@@ -201,6 +211,7 @@ const App = () => {
                   <button 
                     onClick={() => removeFood(food.id)} 
                     className="p-4 text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all rounded-2xl opacity-0 group-hover:opacity-100"
+                    title="מחיקה"
                   >
                     <Trash2 size={24} />
                   </button>
@@ -210,7 +221,7 @@ const App = () => {
           )}
         </div>
 
-        {/* הודעת הצלחה */}
+        {/* הודעת הגעה ליעד */}
         {totals.protein >= targets.protein && totals.carbs >= targets.carbs && totals.fat >= targets.fat && (
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-10 py-6 rounded-[2.5rem] shadow-2xl flex items-center gap-5 animate-bounce z-50 border-2 border-white/20">
             <CheckCircle2 size={32} />
